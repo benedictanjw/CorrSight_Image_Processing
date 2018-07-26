@@ -97,7 +97,7 @@ crosshairX = 250;
 crosshairY = 250;
 slice = 7;
 
-for (j=1; j<=21; j++){ 
+for (j=1; j<=21; j++){
 
 // Generate Orthogonal Sections
 if (numCh == 3){
@@ -111,9 +111,13 @@ else if (numCh == 4){
 Dialog.create("Create Orthogonal Sections");
 Dialog.addMessage("Choose a composite channel to\ncreate orthogonal sections of.\nLook through all channels first to determine\napproximate position of cross-hairs to use\n0: DAPI only\n1: Green\n2: Red\n3: Magenta\n4: Green+Red\n5: Green+Magenta\n6: Red+Magenta\n7: Merge All");
 Dialog.addNumber("Choice:", 3);
+Dialog.addCheckbox("XZ Maximum Intensity Projection", false);
 Dialog.show();
 ch = Dialog.getNumber();
+XZMI = Dialog.getCheckbox();
 }
+
+if (XZMI == false){
 
 fname3 = fname2+"_O_"+channelarray[ch];
 
@@ -257,28 +261,41 @@ close();
 
 }
 
-
 // XZ Max intensity Projection
+else if (XZMI == true){
+
 selectWindow(fname);
 Dialog.create("XZ Maximum Intensity Projection");
-Dialog.addMessage("Proceed with XZ Maximum Intensity Projection?");
-Dialog.addCheckbox("Yes", true);
 Dialog.addNumber("No. of slices:", 100);
-Dialog.addNumber("Start slice:", crosshairX-50)
+Dialog.addNumber("Start slice:", crosshairX-50);
 Dialog.show();
 
-XZMI = Dialog.getCheckbox();
 numb = Dialog.getNumber();
 sl = Dialog.getNumber();
-w = getWdith();
+sl2 = sl+numb;
+w = getWidth();
 
-if (XZMI==1){
 run("Reslice [/]...", "output=0.300 start=Top avoid");
 run("Scale...", "x=1.0 y=2.901 z=1.0 width=w depth=w interpolation=Bilinear average create");
-run("Z Project...", "start=sl stop=sl+numb projection=[Max Intensity]");
+run("Z Project...", "start=sl stop=sl2 projection=[Max Intensity]");
 //run("Channels Tool...");
 Stack.setDisplayMode("color");
 //run("Brightness/Contrast...");
+waitForUser("Adjust B&C for Max Intensity Projection", "Adjust Brightness and Contrast, then click OK");
+Stack.setDisplayMode("composite");
+
+for (k=1; k<=lengthOf(channelarray2)-1; k++){
+fname4 = fname2+"_O_"+channelarray[k];
+run("Duplicate...", "duplicate");
+Stack.setActiveChannels(channelarray2[k]);
+run("Flatten");
+wait(20);
+saveAs("Tiff", fdir+fname4+"_xz_MI"); // Save
+close();
+}
+
+}
+}
 }
 }
 
