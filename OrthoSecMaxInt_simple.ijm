@@ -1,4 +1,4 @@
-macro "Orthogonal sections Action Tool- C059T3e16C" {
+macro "Orthogonal sections Action Tool- C059T3e16B" {
 
 // Get Relevant Info
 a = getMetadata("Info");
@@ -256,4 +256,29 @@ File.close(write2file);
 close();
 
 }
+
+
+// XZ Max intensity Projection
+selectWindow(fname);
+Dialog.create("XZ Maximum Intensity Projection");
+Dialog.addMessage("Proceed with XZ Maximum Intensity Projection?");
+Dialog.addCheckbox("Yes", true);
+Dialog.addNumber("No. of slices:", 100);
+Dialog.addNumber("Start slice:", crosshairX-50)
+Dialog.show();
+
+XZMI = Dialog.getCheckbox();
+numb = Dialog.getNumber();
+sl = Dialog.getNumber();
+w = getWdith();
+
+if (XZMI==1){
+run("Reslice [/]...", "output=0.300 start=Top avoid");
+run("Scale...", "x=1.0 y=2.901 z=1.0 width=w depth=w interpolation=Bilinear average create");
+run("Z Project...", "start=sl stop=sl+numb projection=[Max Intensity]");
+//run("Channels Tool...");
+Stack.setDisplayMode("color");
+//run("Brightness/Contrast...");
 }
+}
+
